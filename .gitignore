@@ -1,0 +1,6 @@
+outputs/*
+.env
+env
+venv
+ENV
+VENV
