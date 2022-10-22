@@ -25,7 +25,9 @@ import tweepy
 import Credenciais
 import csv
 import Keywords
-def escreverDados(arquivo, tweet, texto):
+from textblob import TextBlob
+
+def escreverDados(arquivo, tweet, texto, polaridade, subjetividade):
 	if tweet["geo"] !=None:
 		cx,cy = tweet["geo"]["coordinates"]
 	elif tweet["place"]!=None:
@@ -41,7 +43,13 @@ def escreverDados(arquivo, tweet, texto):
 	else:
 		cx,cy = None,None
 	if texto[-1] != "…" :
-		arquivo.writerow([texto,tweet["id"],tweet["created_at"],cx,cy] )
+		arquivo.writerow([texto,tweet["id"],tweet["created_at"],cx,cy, polaridade, subjetividade] )
+
+def avaliarSentimento(text):
+	blob = TextBlob(text)
+	return {"polarity":  blob.sentiment.polarity, "subjectivity": blob.sentiment.subjectivity}
+
+
 class tweetStreamer(tweepy.Stream):
 	saida = csv.writer(open('outputs/Saida.csv','a+', encoding= 'utf-8'))
 	def on_status(self, status):
@@ -49,9 +57,17 @@ class tweetStreamer(tweepy.Stream):
 			tweet = status._json
 			if hasattr(status, "extended_tweet"):
 				tweet_extendido = tweet["extended_tweet"]
-				escreverDados(self.saida,tweet, tweet_extendido["full_text"])
+				text = tweet_extendido["full_text"]
+				#chamda para função que retorna a polaridade e subjetividade
+				sentimento = avaliarSentimento(text)
+				escreverDados(self.saida,tweet, tweet_extendido["full_text"], sentimento["polarity"], sentimento["subjectivity"])
 			else:
-				escreverDados(self.saida,tweet,tweet["text"])
+				text = tweet["text"]
+				#chamda para função que retorna a polaridade e subjetividade
+				sentimento = avaliarSentimento(text)
+				escreverDados(self.saida,tweet,tweet["text"], sentimento["polarity"], sentimento["subjectivity"])
+
+
 def autenticar():
 	auth = tweepy.OAuthHandler(Credenciais.CONSUMER_KEY,Credenciais.CONSUMER_SECRET)
 	auth.set_access_token(Credenciais.ACCESS_TOKEN, Credenciais.ACCESS_TOKEN_SECRET)
