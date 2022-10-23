@@ -60,12 +60,14 @@ class tweetStreamer(tweepy.Stream):
 				text = tweet_extendido["full_text"]
 				#chamda para função que retorna a polaridade e subjetividade
 				sentimento = avaliarSentimento(text)
-				escreverDados(self.saida,tweet, tweet_extendido["full_text"], sentimento["polarity"], sentimento["subjectivity"])
+				if (sentimento["polarity"] >= -1 and sentimento["polarity"] <= 1)  and (sentimento["subjectivity"] >= 0 and sentimento["subjectivity"] <= 1):
+					escreverDados(self.saida,tweet, tweet_extendido["full_text"], sentimento["polarity"], sentimento["subjectivity"])
 			else:
 				text = tweet["text"]
 				#chamda para função que retorna a polaridade e subjetividade
 				sentimento = avaliarSentimento(text)
-				escreverDados(self.saida,tweet,tweet["text"], sentimento["polarity"], sentimento["subjectivity"])
+				if (sentimento["polarity"] >= -1 and sentimento["polarity"] <= 1)  and (sentimento["subjectivity"] >= 0 and sentimento["subjectivity"] <= 1):
+					escreverDados(self.saida,tweet,tweet["text"], sentimento["polarity"], sentimento["subjectivity"])
 
 
 def autenticar():
